@@ -1,0 +1,60 @@
+<body></body>
+<script src="https://unpkg.com/tone"></script>
+<script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js?v=1"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+//create 4 voice synths
+function createVoice(frequency) {
+  return new Tone.Synth({
+    oscillator: {
+      type: "sawtooth" // Sawtooth wave has a vocal-like quality
+    },
+    envelope: {
+      attack: 0.1,
+      decay: 0.2,
+      sustain: 0.3,
+      release: 0.5
+    }
+  }).toDestination();
+}
+
+// Barbershop voice parts
+const lead = createVoice();
+const tenor = createVoice();
+const baritone = createVoice();
+const bass = createVoice();
+
+// Barbershop harmony rules (classic I - VI - II - V - I progression)
+const harmonyRules = {
+  I:  [0, 4, 7, 12],  // Root, Major third, Perfect fifth, Octave
+  VI: [0, 4, 9, 12],  // Minor chord
+  II: [0, 3, 7, 10],  // Minor 7 chord
+  V:  [0, 4, 7, 10]   // Dominant 7 chord
+};
+  
+// Function to play a chord
+function playChord(rootNote, chordType, duration = "1n") {
+  const intervals = harmonyRules[chordType];
+  if (!intervals) return;
+
+  lead.triggerAttackRelease(Tone.Frequency(rootNote + intervals[0], "midi").toFrequency(), duration);
+  tenor.triggerAttackRelease(Tone.Frequency(rootNote + intervals[1], "midi").toFrequency(), duration);
+  baritone.triggerAttackRelease(Tone.Frequency(rootNote + intervals[2], "midi").toFrequency(), duration);
+  bass.triggerAttackRelease(Tone.Frequency(rootNote + intervals[3] - 12, "midi").toFrequency(), duration);
+}
+
+nn.create('button')
+  .content('play barbershop harmony')
+  .addTo('body')
+  .on("click", async () => {
+    await Tone.start(); // Start the Tone.js audio context
+    console.log("Audio context started");
+
+    // Example: Playing a I - VI - II - V progression in C major
+    playChord(60, "I", "2n");  // C major
+    setTimeout(() => playChord(57, "VI", "2n"), 1000);  // A minor
+    setTimeout(() => playChord(62, "II", "2n"), 2000);  // D minor
+    setTimeout(() => playChord(65, "V", "2n"), 3000);  // G7
+  });
+  
+</script>
