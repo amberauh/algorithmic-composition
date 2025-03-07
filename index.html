@@ -1,73 +1,46 @@
 <body></body>
 <script src="https://unpkg.com/tone"></script>
 <script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js?v=1"></script>
-<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script>
-//create 4 voice synths
-function createVoice(frequency) {
+
+// function to create synth voices
+function createVoice() {
   const synth = new Tone.Synth({
-    oscillator: {
-      type: "fatsine4" // Sawtooth wave has a vocal-like quality
-    },
-    envelope: {
-      attack: 0.1,
-      decay: 0.2,
-      sustain: 0.3,
-      release: 0.5
-    }
+    oscillator: { type: "fatsine4"},
+    envelope: { attack: 0.05, decay: 0.2, sustain: 0.3, release: 0.5 }
   });
 
-  // Create a reverb (wet effect)
-  const reverb = new Tone.Reverb({
-    decay: 1,      // Length of the reverb tail
-    preDelay: 0.1,   // Delay before the reverb starts
-    wet: 0.5      // Mix between dry and wet signals
-  });
-
-  // Connect the synth to the reverb and the reverb to the master output
+  const reverb = new Tone.Reverb({ decay: 1.5, preDelay: 0.1, wet: 0.5 });
   synth.connect(reverb);
-  reverb.toDestination();  // Connect the reverb to master output (audio destination)
-
+  reverb.toDestination();
   return synth;
 }
 
-// Barbershop voice parts
+// instruments
 const lead = createVoice();
 const tenor = createVoice();
 const baritone = createVoice();
 const bass = createVoice();
+const melody = createVoice();
 
-// Barbershop harmony rules (classic I - VI - II - V - I progression)
+// mapping chords and harmonies
+const chordTypes = ["I", "ii", "iii", "IV", "V", "vi"];
 const harmonyRules = {
-  I:  [0, 4, 7, 12],  // Root, Major third, Perfect fifth, Octave
-  VI: [0, 4, 9, 12],  // Minor chord
-  II: [0, 3, 7, 10],  // Minor 7 chord
-  V:  [0, 4, 7, 10]   // Dominant 7 chord
+  I:  [0, 4, 7, 12],
+  ii: [0, 3, 7, 10],
+  iii:[0, 3, 7, 12],
+  IV: [0, 4, 7, 12],
+  V:  [0, 4, 7, 10],
+  vi: [0, 3, 7, 12]
 };
-  
-// Function to play a chord
-function playChord(rootNote, chordType, duration = "1n") {
-  const intervals = harmonyRules[chordType];
-  if (!intervals) return;
 
-  lead.triggerAttackRelease(Tone.Frequency(rootNote + intervals[0], "midi").toFrequency(), duration);
-  tenor.triggerAttackRelease(Tone.Frequency(rootNote + intervals[1], "midi").toFrequency(), duration);
-  baritone.triggerAttackRelease(Tone.Frequency(rootNote + intervals[2], "midi").toFrequency(), duration);
-  bass.triggerAttackRelease(Tone.Frequency(rootNote + intervals[3] - 12, "midi").toFrequency(), duration);
+// random chord progression (4 chords long)
+function generateChordProgression() {
+  let progression = [];
+  for (let i = 0; i < 4; i++) {
+    progression.push(nn.random(chordTypes));
+  }
+  return progression;
 }
 
-nn.create('button')
-  .content('play barbershop harmony')
-  .addTo('body')
-  .on("click", async () => {
-    await Tone.start(); // Start the Tone.js audio context
-    console.log("Audio context started");
-
-    // Example: Playing a I - VI - II - V progression in C major
-    playChord(60, "I", "2n");  // C major
-    setTimeout(() => playChord(57, "VI", "2n"), 1000);  // A minor
-    setTimeout(() => playChord(62, "II", "2n"), 2000);  // D minor
-    setTimeout(() => playChord(65, "V", "2n"), 3000);  // G7
-  });
-  
 </script>
