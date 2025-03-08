@@ -2,14 +2,17 @@
   <h1 id='header'>
     Sloppy Improv
   </h1>
-  <p id='desc'>
+  <p class='quote desc'>
     "that's not a wrong note, you just lack confidence." - jacob collier
   </p>
   </p>
-  <p id='desc'>
-    an algorithmically generated improviser. sort of jazzy, sort of funky, but more so a genre of its own. it uses completely random chord progressions and melodies. 
+  <p class='text desc'>
+    an algorithmically generated improviser. sort of jazzy, sort of funky, but more so a genre of its own. it uses completely random chord progressions and melodies. click play below to start improvising!
   </p>
-  
+  <div data-width='200'
+       id='gif-container'class="tenor-gif-embed" data-postid="10833221126705647709" data-share-method="host" data-aspect-ratio="1.45614" data-width="100%"><a href="https://tenor.com/view/tom-and-jerry-jerry-play-piano-silly-dance-gif-10833221126705647709">Tom And Jerry Play Piano GIF</a>from <a href="https://tenor.com/search/tom+and+jerry-gifs">Tom And Jerry GIFs</a></div> <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
+</div>
+</div>
 </body>
 <style>
   #header {
@@ -17,11 +20,25 @@
     text-align: center;
   }
   
-  #desc {
-    font-family: "American Typewriter";
-    text-align: center;
-    top: 50%;
+  .desc {
+    font-family: "American Typewriter";   
   }
+  .quote {
+    text-align: center;
+  }
+  #gif-container {
+  z-index: -1;
+  width: 30%;
+  height: auto;
+  left: 35%;
+  margin-top: 5%;
+}
+  .text {
+  width: 40vw;
+  text-align: left;
+  margin: 0 auto;
+  }
+  
 </style>
 <script src="https://unpkg.com/tone"></script>
 <script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js?v=1"></script>
@@ -176,7 +193,7 @@ const container = nn.create('section')
     alignItems: 'center',
     position: 'fixed',
     width: '100vw',
-    height: '100vh'
+    height: '50vh'
   })
 // Button to start music
 let playButton = nn.create('button')
