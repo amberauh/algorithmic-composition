@@ -3,7 +3,7 @@
     Sloppy Improv
   </h1>
   <p class='quote desc'>
-    "that's not a wrong note, you just lack confidence." - jacob collier
+"it's not the note you play that's the wrong note – it's the note you play afterwards that makes it right or wrong" - miles davis
   </p>
   </p>
   <p class='text desc'>
@@ -18,6 +18,7 @@
   #header {
     font-family: "American Typewriter";
     text-align: center;
+    
   }
   
   .desc {
@@ -25,13 +26,15 @@
   }
   .quote {
     text-align: center;
+    width: 40vw;
+    margin: 0 auto;
   }
   #gif-container {
   z-index: -1;
   width: 30%;
   height: auto;
   left: 35%;
-  margin-top: 5%;
+  margin-top: 3%;
 }
   .text {
   width: 40vw;
@@ -193,7 +196,7 @@ const container = nn.create('section')
     alignItems: 'center',
     position: 'fixed',
     width: '100vw',
-    height: '50vh'
+    height: '20vh'
   })
 // Button to start music
 let playButton = nn.create('button')
