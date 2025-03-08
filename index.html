@@ -1,4 +1,28 @@
-<body></body>
+<body>
+  <h1 id='header'>
+    Sloppy Improv
+  </h1>
+  <p id='desc'>
+    "that's not a wrong note, you just lack confidence." - jacob collier
+  </p>
+  </p>
+  <p id='desc'>
+    an algorithmically generated improviser. sort of jazzy, sort of funky, but more so a genre of its own. it uses completely random chord progressions and melodies. 
+  </p>
+  
+</body>
+<style>
+  #header {
+    font-family: "American Typewriter";
+    text-align: center;
+  }
+  
+  #desc {
+    font-family: "American Typewriter";
+    text-align: center;
+    top: 50%;
+  }
+</style>
 <script src="https://unpkg.com/tone"></script>
 <script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js?v=1"></script>
 <script>
@@ -42,5 +66,150 @@ function generateChordProgression() {
   }
   return progression;
 }
+  
+// generate melody that follows the chord and has a sense of movement
+function generateMelody(rootNote, chordType) {
+  const intervals = harmonyRules[chordType];
+  if (!intervals) return [];
+
+  let melodyNotes = [];
+  let totalDuration = 0;
+  let lastNote = rootNote + nn.random(intervals); // start from a random chord note
+
+  while (totalDuration < 2) { // melody for about 2 beats
+    let note = rootNote + nn.random(intervals); 
+
+    // add slight directional movement (avoid completely random jumps)
+    if (Math.random() > 0.5) {
+      note += nn.random([-2, 0, 2]); // small step up/down
+    }
+
+    const duration = nn.random(["4n", "8n", "16n"]);
+    melodyNotes.push({ note, duration });
+    lastNote = note;
+    totalDuration += { "4n": 0.25, "8n": 0.125, "16n": 0.0625 }[duration];
+  }
+
+  return melodyNotes;
+}
+
+// procedurally play a progression
+let currentTimeouts = []; // store timeouts for stopping later
+async function playChordWithMelody(rootNote, chordType, callback) {
+  
+  
+  const intervals = harmonyRules[chordType];
+  if (!intervals) return;
+  
+  
+  // play harmony
+  lead.triggerAttackRelease(Tone.Frequency(rootNote + intervals[0], "midi").toFrequency(), "2n");
+  tenor.triggerAttackRelease(Tone.Frequency(rootNote + intervals[1], "midi").toFrequency(), "2n");
+  baritone.triggerAttackRelease(Tone.Frequency(rootNote + intervals[2], "midi").toFrequency(), "2n");
+  bass.triggerAttackRelease(Tone.Frequency(rootNote + intervals[3] - 12, "midi").toFrequency(), "2n");
+
+  // generate melody
+  const melodyNotes = generateMelody(rootNote, chordType);
+  let timeOffset = 0;
+
+  melodyNotes.forEach(({ note, duration }) => {
+    let timeoutId = setTimeout(() => {
+      
+      const hue = nn.randomInt(50, 200)
+      const saturation = nn.randomInt(25, 65)
+      nn.get('body').css({
+      backgroundColor: `hsl(${hue}deg, ${saturation}%, 50%)`
+      });
+      melody.triggerAttackRelease(Tone.Frequency(note, "midi").toFrequency(), duration);
+    }, timeOffset * 1000);
+    
+    currentTimeouts.push(timeoutId); // store timeout ID to clear later
+    timeOffset += Tone.Time(duration).toSeconds();
+  });
+
+  // move to next chord when melody finishes
+  let timeoutId = setTimeout(callback, timeOffset * 1000);
+  currentTimeouts.push(timeoutId); // store timeout ID for clearing
+}
+
+// start procedural generation
+function playProceduralProgression() {
+  const rootNote = nn.random([48, 50, 52, 53, 55, 57, 59, 60]); // random root note
+  const progression = generateChordProgression();
+  console.log("Generated Progression:", progression);
+
+  let index = 0;
+  function nextChord() {
+    if (index < progression.length) {
+      playChordWithMelody(rootNote, progression[index], nextChord);
+      index++;
+    } else {
+      setTimeout(playProceduralProgression, 2000); // regenerate after a short break
+    }
+  }
+
+  nextChord();
+}
+
+//UI ELEMENTS
+
+const buttonCSS = {
+  border: '1px solid black',
+  padding: '20px 30px',
+  background: 'transparent',
+  margin: '10px',
+  cursor: 'pointer'
+}
+
+function buttonHover (e) {
+  const button = e.target
+  const over = e.type === 'mouseover'
+  button.style.background = over ? 'black' : 'transparent'
+  button.style.color = over ? 'white' : 'black'
+}
+  
+const container = nn.create('section')
+  .addTo('body')
+  .css({
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'fixed',
+    width: '100vw',
+    height: '100vh'
+  })
+// Button to start music
+let playButton = nn.create('button')
+  .content('Play')
+  .addTo(container)
+  .css(buttonCSS)
+  .on('mouseover', buttonHover)
+  .on('mouseout', buttonHover)
+  .on("click", async () => {
+    await Tone.start();
+    playProceduralProgression();
+  });
+
+// Button to stop music
+let stopButton = nn.create('button')
+  .content('Stop')
+  .addTo(container)
+  .css(buttonCSS)
+  .on('mouseover', buttonHover)
+  .on('mouseout', buttonHover)
+  .on("click", () => {
+    // Cancel all scheduled events
+    currentTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+    currentTimeouts = []; // Clear the array of timeouts
+
+    // Release all notes immediately
+    lead.triggerRelease();
+    tenor.triggerRelease();
+    baritone.triggerRelease();
+    bass.triggerRelease();
+    melody.triggerRelease();
+
+    console.log("Music stopped.");
+  });
 
 </script>
